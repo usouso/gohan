@@ -1,0 +1,2 @@
+[1920x910] 失敗  errors=0 overlaps=0 overflow=0 scroll=0 finished=false state={"screen":"play","state":"eating","time":677.0666666663795,"eaten":0.7272587781818179,"seed":1000,"diner":"bold","dish":"bonefish","utensil":"hashi","particles":70,"result":null}
+[1366x650] 失敗  errors=0 overlaps=0 overflow=0 scroll=0 finished=false state={"screen":"play","state":"eating","time":676.7999999997131,"eaten":0.7272587781818179,"seed":1000,"diner":"bold","dish":"bonefish","utensil":"hashi","particles":70,"result":null}

@@ -28,6 +28,10 @@
     $('rvDinerName').textContent = m.diner.name; $('rvDinerSub').textContent = m.diner.sub; $('rvDishName').textContent = m.dish.name; $('rvDishDesc').textContent = m.dish.desc;
     $('rvUtensil').textContent = UT_NAME[m.utensilKey]; $('rvUtensilNote').textContent = m.dish.natural.includes(m.utensilKey) ? 'この料理に合う食器' : '合わない食器……どう食べる？';
     $('rvSeed').textContent = '食卓 No. ' + g.seed; $('status').textContent = g.rng.pick(m.diner.lines.start);
+    if (m.diner.specialName) $('rvDinerSub').textContent = m.diner.sub + '　とくぎ：' + m.diner.specialName;
+    const slurpLabel = m.diner.special === 'fire' ? '炎を吐く' : '吸う';
+    $('chipSlurp').innerHTML = '<kbd>I</kbd>' + slurpLabel; $('padChipSlurp').innerHTML = '<kbd>LT / LB</kbd>' + slurpLabel;
+    padTarget = null;
     $('fullFill').style.width = '0%'; $('fullNum').textContent = '0%'; $('timer').textContent = '0:00';
     renderer.draw(g); show('reveal');
   }
@@ -38,7 +42,8 @@
     $('rsReason').textContent = REASON[r.reason] || r.reason; $('rsLine').textContent = '「' + r.line + '」'; $('rsWho').textContent = m.diner.name + ' ／ ' + m.dish.name + ' ／ ' + UT_NAME[m.utensilKey];
     $('rsSat').textContent = r.satisfy; $('rsClean').textContent = r.clean; $('rsMan').textContent = r.manners;
     const lab = $('rsLabels'); lab.innerHTML = ''; for (const t of (r.labels.length ? r.labels : ['ふつうの食べ方'])) { const sp = document.createElement('span'); sp.className = 'label'; sp.textContent = t; lab.appendChild(sp); }
-    const s = r.stats; const rows = [['食べた時間', Math.floor(game.time / 60) + '分' + Math.round(game.time % 60) + '秒'], ['食べた量', Math.round(r.eatenFrac * 100) + '%'], ['こぼした量', Math.round(r.spillFrac * 100) + '%（テーブル ' + Math.round(s.spillTable / r.edibleTotal * 100) + '% ／ 床 ' + Math.round(s.spillFloor / r.edibleTotal * 100) + '% ／ 服 ' + Math.round(s.spillClothes / r.edibleTotal * 100) + '%）'], ['飲みこんだ回数', r.summary.swallows + '回'], ['一口の大きさ（のどの容量に対して）', Math.round(r.avgBiteRatio * 100) + '%'], ['一口あたり噛んだ回数', r.chewsPerBite.toFixed(1) + '回'], ['むせた', s.chokes + '回'], ['丸飲み', s.marunomi + '回'], ['骨', '飲んだ ' + s.boneSwallows + '／噛んだ ' + s.boneBites], ['食器を噛んだ', s.clacks + '回'], ['箸からこぼれた', s.slips + '回']];
+    const s = r.stats; const rows = [['食べた時間', Math.floor(game.time / 60) + '分' + Math.round(game.time % 60) + '秒'], ['食べた量', Math.round(r.eatenFrac * 100) + '%'], ['こぼした量', Math.round(r.spillFrac * 100) + '%（テーブル ' + Math.round(s.spillTable / r.edibleTotal * 100) + '% ／ 床 ' + Math.round(s.spillFloor / r.edibleTotal * 100) + '% ／ 服 ' + Math.round(s.spillClothes / r.edibleTotal * 100) + '%）'], ['飲みこんだ回数', r.summary.swallows + '回'], ['一口の大きさ（のどの容量に対して）', Math.round(r.avgBiteRatio * 100) + '%'], ['一口あたり噛んだ回数', r.chewsPerBite.toFixed(1) + '回'], ['むせた', s.chokes + '回'], ['丸飲み', s.marunomi + '回'], ['骨', '飲んだ ' + s.boneSwallows + '／噛んだ ' + s.boneBites], ['食器を噛んだ', s.clacks + '回'], ['箸からこぼれた', s.slips + '回'], ['かじり取った・ちぎった', s.biteOffs + '回・' + s.tears + '回']];
+    if (m.diner.special === 'fire') rows.push(['炎で焼いた', Math.round(s.fireTime) + '秒（こがした ' + s.charred + '）']); if (m.diner.special === 'tusks') rows.push(['牙で噛みちぎった', s.tusks + '回']);
     const tb = $('rsTable'); tb.innerHTML = ''; for (const [k, v] of rows) { const r = document.createElement('div'); r.className = 'r'; const a = document.createElement('span'); a.textContent = k; const b = document.createElement('b'); b.textContent = v; r.appendChild(a); r.appendChild(b); tb.appendChild(r); }
     show('result'); audio.play(r.reason === 'finished' ? 'finished' : 'full');
   }
@@ -80,6 +85,32 @@
   $('btnFinish').addEventListener('click', () => { if (game && screen === 'play') game.setInput({ finish: true }); });
   $('vol').addEventListener('input', e => audio.setVolume(parseInt(e.target.value, 10) / 100)); audio.setVolume(parseInt($('vol').value, 10) / 100); if (MUTE) { audio.setMuted(true); $('vol').value = 0; }
 
+  // ---- ゲームパッド（標準配置：左スティック=手、右スティック=かたむき、RT/RB=つかむ、A=口、X=噛む、Y=舌、B=飲む、LT/LB=吸う、Start=ごちそうさま）----
+  let padTarget = null; const padPrev = {}; let padSeen = false;
+  function padButton(gp, i) { const b = gp.buttons[i]; return !!(b && (b.pressed || b.value > .5)); }
+  function pollPad(dt) {
+    const pads = navigator.getGamepads ? navigator.getGamepads() : []; let gp = null; for (const p of pads) if (p && p.connected) { gp = p; break; }
+    if (!gp) return;
+    if (!padSeen) { padSeen = true; $('padbar').style.display = 'flex'; resize(); }
+    const dz = v => Math.abs(v) < .18 ? 0 : v;
+    const start = padButton(gp, 9), a = padButton(gp, 0);
+    const edge = (name, v) => { const was = !!padPrev[name]; padPrev[name] = v; return v && !was; };
+    const startEdge = edge('start', start), aEdge = edge('a', a);
+    if (screen === 'title') { if (startEdge || aEdge) $('btnStart').click(); return; }
+    if (screen === 'reveal') { if (startEdge || aEdge) $('btnGo').click(); return; }
+    if (screen === 'result') { if (startEdge || aEdge) $('btnAgain').click(); return; }
+    if (!game || AUTO) return;
+    if (!padTarget) padTarget = { x: game.hand.x, y: game.hand.y };
+    const lx = dz(gp.axes[0] || 0), ly = dz(gp.axes[1] || 0); const sp = 1000 * dt;
+    if (lx || ly) { padTarget.x = Math.max(0, Math.min(W, padTarget.x + lx * sp)); padTarget.y = Math.max(0, Math.min(H, padTarget.y + ly * sp)); game.setInput({ tx: padTarget.x, ty: padTarget.y }); }
+    const rx = dz(gp.axes[2] || 0); if (rx) game.setInput({ tilt: game.input.tilt + rx * 2.4 * dt });
+    game.setInput({ squeeze: padButton(gp, 7) || padButton(gp, 5), mouth: a, tongue: padButton(gp, 3), slurp: padButton(gp, 6) || padButton(gp, 4) });
+    if (edge('x', padButton(gp, 2))) game.setInput({ chew: true });
+    if (edge('b', padButton(gp, 1))) game.setInput({ swallow: true });
+    if (startEdge && game.time > 2) game.setInput({ finish: true });
+  }
+  window.addEventListener('gamepadconnected', () => { padSeen = true; $('padbar').style.display = 'flex'; resize(); });
+
   // ---- 進行 ----
   function stepGame(dt) {
     if (keyHold.a) game.setInput({ tilt: game.input.tilt - 1.8 * dt }); if (keyHold.d) game.setInput({ tilt: game.input.tilt + 1.8 * dt });
@@ -90,7 +121,7 @@
       if (ev.type === 'crunch') audio.play('crunch', { hard: .5 }); else if (ev.type === 'chew') { /* 噛みくだく音は crunch で */ } else audio.play(ev.type, ev);
     }
     game.events.length = 0;
-    const sl = !!game.slurpOn; if (sl !== slurping) { slurping = sl; audio.play(sl ? 'slurp_start' : 'slurp_stop'); }
+    const sl = !!(game.slurpOn || game.fireOn); if (sl !== slurping) { slurping = sl; audio.play(sl ? 'slurp_start' : 'slurp_stop'); }
   }
   function updateHud() {
     const t = game.time; $('timer').textContent = Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
@@ -100,8 +131,10 @@
   }
   function frame(now) {
     if (!BG) requestAnimationFrame(frame);
-    if (!game || screen !== 'play') { lastT = now; return; }
-    let dt = (now - lastT) / 1000; lastT = now; if (dt > .1) dt = .1; acc += dt;
+    let dt = (now - lastT) / 1000; lastT = now; if (dt > .1) dt = .1;
+    pollPad(dt);
+    if (!game || screen !== 'play') return;
+    acc += dt;
     const step = 1 / 60; let n = 0;
     while (acc >= step && n < 4 * FAST) { for (let i = 0; i < FAST && game.state === 'eating'; i++) stepGame(step); acc -= step; n++; }
     if (acc > step * 4) acc = 0;

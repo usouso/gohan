@@ -42,6 +42,8 @@
           inp.squeeze = false; inp.mouth = false; inp.tongue = false; inp.slurp = false;
           bot.target = pickTarget();
           if (!bot.target) { if (game.mouthCount > 0) { go('chew'); break; } inp.finish = bot.phaseT > 3; break; }
+          // ドラゴンは、最初に少し炎で焼いてから食べる
+          if (d.special === 'fire' && !bot.fired && bot.phaseT < 1.6) { inp.mouth = true; inp.slurp = bot.phaseT > .3; tipTo(game.mouth.x - 160 * d.hs, game.mouth.y + 120, tiltDown); if (bot.phaseT > 1.5) bot.fired = true; break; }
           const ax = key === 'spoon' ? bot.target.x - 34 : bot.target.x; tipTo(ax, bot.target.y - 46, tiltDown);
           if (tipNear(ax, bot.target.y - 46, 16) || bot.phaseT > 2.5) { bot.anchor = { x: bot.target.x, y: bot.target.y }; go('dip'); }   // ねらった位置を覚える（運んでいる粒を追いかけない）
           break;

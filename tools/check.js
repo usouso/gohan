@@ -58,6 +58,8 @@ const TEXT_CHECK = `(() => {
       if (shots === 1 && state.time > 14) { await shot('04-eating-b'); shots++; }
       textAgg(await page.evaluate(TEXT_CHECK)); await new Promise(r => setTimeout(r, 100));
     }
+    // 制限時間がないので、時間が来たら「ごちそうさま」を押して結果へ
+    if (state && state.screen === 'play') { await page.evaluate(() => window.__gohan.game.end('quit')); await page.waitForFunction(() => window.__gohan.screen === 'result', { timeout: 5000 }).catch(() => { }); }
     await new Promise(r => setTimeout(r, 300)); textAgg(await page.evaluate(TEXT_CHECK)); await shot('05-result');
     state = await page.evaluate(() => window.__gohan.state()); res.final = state;
     // コマ送り（0.05秒ごと 10 コマ）は結果の前に撮れないので、新しい食卓を開いて撮る

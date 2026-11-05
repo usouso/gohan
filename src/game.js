@@ -23,8 +23,9 @@
     swallow_start: 'ごく……', gulp: 'ごくん', yummy: 'おいしい！', gulp_big: '大口でごくん……苦しい', marunomi: '丸飲みした……',
     choke: 'むせた！', bone_swallow: 'のどに骨が！', swallow_empty: 'つばを飲んだ', face_bump: 'ほっぺに当たった', escaped: 'ぶどうが逃げた',
     full: 'おなかいっぱい', finished: '完食！', gone: '器は空……でも、だいぶこぼした', timeout: '時間切れ', quit: 'ごちそうさま',
+    tear: 'ちぎった', bite_off: 'かじり取った', fire: 'ゴオオッ（炎）', charred: 'こがした', tusk: '牙で噛みちぎった',
   };
-  const TOAST_TEXT = { slip: 'ぽろっ', spill_table: 'ぽとっ', spill_floor: 'べちゃ', spill_clothes: 'あっ', clack: 'カチッ', bone_bite: 'ガリッ', gulp: 'ごくん', yummy: 'おいしい！', gulp_big: '大口！', marunomi: '丸飲み…', choke: 'むせた！', bone_swallow: 'のどに骨！', crunch: 'もぐ', face_bump: 'ぺち', escaped: 'ふわ…', swallow_empty: 'ごく…' };
+  const TOAST_TEXT = { slip: 'ぽろっ', spill_table: 'ぽとっ', spill_floor: 'べちゃ', spill_clothes: 'あっ', clack: 'カチッ', bone_bite: 'ガリッ', gulp: 'ごくん', yummy: 'おいしい！', gulp_big: '大口！', marunomi: '丸飲み…', choke: 'むせた！', bone_swallow: 'のどに骨！', crunch: 'もぐ', face_bump: 'ぺち', escaped: 'ふわ…', swallow_empty: 'ごく…', tear: 'ちぎっ', bite_off: 'がぶっ', charred: 'こげた', tusk: 'ガブリ' };
 
   class Game {
     constructor(opts) {
@@ -68,7 +69,7 @@
       this.geom = this.mouthGeom();
     }
     initStats() {
-      this.stats = { chews: 0, openChews: 0, crushChews: 0, swallows: [], biteRatios: [], eaten: 0, spillTable: 0, spillFloor: 0, spillClothes: 0, chokes: 0, boneBites: 0, boneSwallows: 0, clacks: 0, slips: 0, grabs: 0, marunomi: 0, slurpTime: 0, bumps: 0, escaped: 0 };
+      this.stats = { chews: 0, openChews: 0, crushChews: 0, swallows: [], biteRatios: [], eaten: 0, spillTable: 0, spillFloor: 0, spillClothes: 0, chokes: 0, boneBites: 0, boneSwallows: 0, clacks: 0, slips: 0, grabs: 0, marunomi: 0, slurpTime: 0, bumps: 0, escaped: 0, tears: 0, biteOffs: 0, fireTime: 0, charred: 0, tusks: 0 };
     }
     setInput(partial) {
       for (const k in partial) {
@@ -155,7 +156,7 @@
       for (const s of kin) { const key = s.tag; const prev = this.prevKin.get(key); if (prev) { s.vx = ((s.ax + s.bx) / 2 - (prev.ax + prev.bx) / 2) / dt; s.vy = ((s.ay + s.by) / 2 - (prev.ay + prev.by) / 2) / dt; s.pax = prev.ax; s.pay = prev.ay; s.pbx = prev.bx; s.pby = prev.by; } this.prevKin.set(key, { ax: s.ax, ay: s.ay, bx: s.bx, by: s.by }); }
       this.mouthSegs = kin.filter(s => !/stick|bowl|handle|tines/.test(s.tag)); this.utSegs = kin.filter(s => /stick|bowl|handle|tines/.test(s.tag));
       this.world.kinematics = kin;
-      this.updateGrabs(); this.applyForces(dt);
+      this.updateGrabs(); this.tearHeld(); this.applyForces(dt);
       this.world.step(dt, sub);
       this.postStep(dt); this.checkEnd();
       this.toasts = this.toasts.filter(t => this.time - t.t < 1.5);
@@ -203,7 +204,21 @@
       this._swallowEdge = false;
       if (this.swallowT > 0) { this.swallowT -= dt; if (this.swallowT <= 0) { this.swallowT = 0; this.finishSwallow(); } }
       if (this.cough > 0) this.cough -= dt;
-      this.slurpOn = (inp.slurp && this.aperture > .25 && this.cough <= 0) ? 1 : 0; if (this.slurpOn) this.stats.slurpTime += dt;
+      const breathOn = (inp.slurp && this.aperture > .25 && this.cough <= 0) ? 1 : 0;
+      if (d.special === 'fire') { this.slurpOn = 0; const was = this.fireOn; this.fireOn = breathOn; if (breathOn) this.stats.fireTime += dt; if (breathOn && !was) this.emit('fire'); }
+      else { this.slurpOn = breathOn; this.fireOn = 0; if (this.slurpOn) this.stats.slurpTime += dt; }
+    }
+    // 箸で挟んだまま引っぱると、つなぎが切れて「ちぎれる」（すべる前に、ちぎれる）
+    tearHeld() {
+      const w = this.world; let torn = 0;
+      for (const h of w.holds) {
+        if (h.dead || h.tag !== 'pinch' || !h.load || h.load < h.slipTol * .4) continue; const p = h.p;
+        for (const c of w.constraints) {
+          if (c.dead || (c.a !== p && c.b !== p)) continue; const q = c.a === p ? c.b : c.a; if (q.held) continue;
+          const d = Math.hypot(q.x - p.x, q.y - p.y); if (d > c.len * 1.12) { c.dead = true; c.a.ncons--; c.b.ncons--; torn++; }
+        }
+      }
+      if (torn > 0) { this.stats.tears++; if (this.time - (this.lastTearT || -9) > .5) { this.lastTearT = this.time; this.emit('tear', { p: this.hand }); } }
     }
     updateGrabs() {
       const key = this.utensilKey, w = this.world, segs = this.utSegs;
@@ -235,7 +250,7 @@
       // つかんだ瞬間は、手が「今の位置」にあるものとして、ずれが出ないようにする
       this.prevHand = { x: this.hand.x, y: this.hand.y }; this.prevTilt = this.tilt;
       const g = this.diner.grip * (tag === 'spear' ? 1.3 : (this.utensilKey === 'hand' ? UT.hand.grip : 1));
-      const tol = Math.max(1.5, p.mat.slip * g * (this.utensilKey === 'fork' ? 2.2 : (.6 + .5 * this.squeeze)));
+      const tol = Math.max(1.5, p.mat.slip * g * (this.utensilKey === 'fork' ? 2.2 : (.9 + .6 * this.squeeze)));
       const self = this;
       // サブステップごとに手の位置を補間する（1フレームぶん一気に動くと、それだけで「すべった」になる）
       const h = this.world.hold(p, () => {
@@ -248,9 +263,18 @@
     }
     applyForces(dt) {
       const M = this.mouth, g = this.geom, d = this.diner;
+      let charredNow = 0;
       for (const p of this.world.particles) {
         if (!p.inMouth) {
           if (this.slurpOn) { const lx = p.x - M.x, ly = p.y - M.y; const range = 150 * d.hs; if (lx < 0 && lx > -range && Math.abs(ly) < g.lipGap / 2 + 36) { const f = 5600 * d.slurp * (1 - (-lx) / range); p.ax += f; p.ay += -ly * 8; } }
+          else if (this.fireOn) {
+            // ドラゴンの炎：口の前の食べ物を焼く（こんがり → こげ）。少し吹き飛ばす。
+            const lx = p.x - M.x, ly = p.y - M.y; const range = 300 * d.hs;
+            if (lx < 0 && lx > -range && Math.abs(ly) < 30 * d.hs + (-lx) * .35) {
+              const near = 1 - (-lx) / range; if (!p.mat.liquid) { const before = p.roast || 0; p.roast = before + dt * (1.2 * near + .2); if (before < 2.2 && p.roast >= 2.2) charredNow++; }
+              p.ax -= 900 * near; p.ay -= 500 * near * (.5 + Math.sin(this.time * 37 + p.id) * .5);
+            }
+          }
           continue;
         }
         if (this.tongue > .05) p.ax += 5200 * this.tongue;
@@ -258,13 +282,14 @@
         if (this.slurpOn) p.ax += 900;
         if (this.cough > 0) { p.ax -= 9500; p.ay -= 1800; }
       }
+      if (charredNow > 0) { this.stats.charred += charredNow; this.emit('charred', { p: { x: M.x - 120 * d.hs, y: M.y } }); }
     }
     postStep(dt) {
       const M = this.mouth, g = this.geom, Dp = this.diner.D, w = this.world; let occ = 0, count = 0;
       for (const p of w.particles) {
         const lx = p.x - M.x, ly = p.y - M.y; let inM = false;
         if (lx > 0 && lx < Dp + 30) { const cy = E.polyY(g.ceiling, Math.min(lx, Dp)), fy = E.polyY(g.floor, Math.min(lx, Dp)); inM = ly > cy - 3 && ly < fy + 3; }
-        if (this.swallowT > 0 && lx > Dp * .9 && inM) { this.swallowBatch.push({ r: p.r, hard: p.hard, mat: p.mat, chews: p.chews }); w.kill(p, 'swallowed'); continue; }
+        if (this.swallowT > 0 && lx > Dp * .9 && inM) { this.swallowBatch.push({ r: p.r, hard: p.hard, mat: p.mat, chews: p.chews, roast: p.roast || 0 }); w.kill(p, 'swallowed'); continue; }
         if (inM && !p.inMouth) { p.inMouth = true; p.zone = 'mouth'; this.emit('enter_mouth', { p }); }
         else if (!inM && p.inMouth) { p.inMouth = false; p.zone = 'air'; }
         if (inM) { occ += p.r * p.r * Math.PI * 1.15; count++; continue; }
@@ -277,7 +302,7 @@
         p.zone = 'air';
       }
       this.mouthCount = count; this.mouthOcc = occ; if (count === 0) this.lastMouthEmptyT = this.time;
-      let cmd = 0; for (const p of w.particles) if (p.inMouth && !p.mat.liquid) { const lx = p.x - M.x; if (lx > Dp * .1 && lx < Dp * .64 && p.r * 2 > cmd) cmd = p.r * 2; } this.crushMaxDiam = cmd;
+      let cmd = 0; for (const p of w.particles) if (p.inMouth && !p.mat.liquid) { const lx = p.x - M.x; if (lx > Dp * .02 && lx < Dp * .64 && p.r * 2 > cmd) cmd = p.r * 2; } this.crushMaxDiam = cmd;
       const cap = this.cavityArea() * this.diner.cheek; this.pressure = occ / Math.max(1, cap);
       for (const ev of w.events) {
         if (ev.type === 'dead' && ev.reason === 'fell') { const p = ev.p; if (p.mat.bone) continue; const mass = p.r * p.r; if (p.spilled) this.stats.spillTable = Math.max(0, this.stats.spillTable - mass); p.spilled = true; if (p.x > this.tableRight - 10) { this.stats.spillClothes += mass; this.emit('spill_clothes', { p }); } else { this.stats.spillFloor += mass; this.emit('spill_floor', { p }); } }
@@ -288,8 +313,9 @@
     }
     crush() {
       const M = this.mouth, g = this.geom, d = this.diner, w = this.world; const Dp = d.D;
-      const gap = g.ap * d.G; const x0 = Dp * .1, x1 = Dp * .64; let crushed = 0, boneHit = false;
+      const gap = g.ap * d.G; const x0 = Dp * .02, x1 = Dp * .64; let crushed = 0, boneHit = false, frontCut = 0, tuskCut = 0;
       const power = d.jawPower * (this.pressure > 1 ? .7 : 1);
+      const frontX = Dp * .22;   // ここより前は前歯（かじり取る）。オークは牙で、より強く・つなぎごと噛みちぎる
       for (const s of this.utSegs) {
         if (s.tag === 'handle') continue;
         const ex = s.bx - M.x, ey = s.by - M.y;
@@ -303,12 +329,21 @@
         if (p.mat.bone) { boneHit = true; continue; }
         if (p.mat.liquid) continue;
         p.chews++; crushed++;
-        p.hard -= over * power * p.mat.crush * (1 + .4 * p.mash);
+        const front = lx < frontX; const tusk = front && d.special === 'tusks';
+        const roastK = p.roast >= 2.2 ? 1.6 : 1;   // こげた物はもろい
+        p.hard -= over * power * p.mat.crush * (1 + .4 * p.mash) * (tusk ? 2.2 : 1) * roastK;
+        if (front && p.ncons > 0) {
+          // 前歯で噛むと、口の外につながる「つなぎ」が切れて、かじり取れる
+          let cut = 0; for (const c of w.constraints) { if (c.dead || (c.a !== p && c.b !== p)) continue; const q = c.a === p ? c.b : c.a; if (!q.inMouth || tusk) { c.dead = true; c.a.ncons--; c.b.ncons--; cut++; } }
+          if (cut) { frontCut++; if (tusk) tuskCut++; }
+        }
         if (p.hard < .55 && p.ncons > 0) w.breakLinks(p);
         if (p.hard <= 0) toSplit.push(p);
       }
       for (const p of toSplit) w.split(p, this.rng);
       if (boneHit) { this.stats.boneBites++; this.emit('bone_bite'); }
+      if (tuskCut > 0) { this.stats.tusks++; this.emit('tusk'); }
+      else if (frontCut > 0) { this.stats.biteOffs++; this.emit('bite_off'); }
       if (crushed > 0) { this.stats.crushChews++; this.emit('crunch', { n: crushed }); }
       this.chewsSinceSwallow++;
     }
@@ -316,7 +351,12 @@
       const b = this.swallowBatch; this.swallowBatch = []; this.swallowCd = .3; const d = this.diner;
       if (!b.length) { this.emit('swallow_empty'); return; }
       let vol = 0, hardSum = 0, bones = 0, maxChunk = 0, taste = 0;
-      for (const q of b) { const a = q.r * q.r; if (q.mat.bone) { bones++; continue; } vol += a; hardSum += q.hard * a; taste += q.mat.taste * a; if (q.hard > .6 && q.r > maxChunk) maxChunk = q.r; }
+      for (const q of b) {
+        const a = q.r * q.r; if (q.mat.bone) { bones++; continue; } vol += a; hardSum += q.hard * a;
+        // 焼き加減：こんがり（0.6〜2.2）はおいしい。こげ（2.2〜）はまずい。ドラゴンは焼いた物が好き
+        const ro = q.roast || 0; const tk = ro >= 2.2 ? .3 : (ro >= .6 ? (d.special === 'fire' ? 1.6 : 1.2) : (d.special === 'fire' ? .8 : 1));
+        taste += q.mat.taste * a * tk; if (q.hard > .6 && q.r > maxChunk) maxChunk = q.r;
+      }
       const hardAvg = vol > 0 ? hardSum / vol : 0; const capArea = d.throatCap * 49;
       const biteRatio = vol / (d.throatCap * 49);   // のどの容量（一度に楽に飲める量）に対する一口の大きさ
       const rec = { t: this.time, vol, hardAvg, bones, maxChunk, chews: this.chewsSinceSwallow, result: 'ok', biteRatio };
@@ -347,7 +387,7 @@
       if (this.input.finish) return this.end('quit');
       if (remain < this.edibleTotal * .06) { if (this.mouthCount === 0 || this.time - this.lastMouthEmptyT > 10) return this.end(this.stats.eaten > this.edibleTotal * .75 ? 'finished' : 'gone'); }
       if (this.fullness >= 1) return this.end('full');
-      if (this.time >= 420) return this.end('timeout');
+      // 制限時間はなし（2026-11-06 ぼくくんの答え 1A）。「ごちそうさま」を押すまで食べられる。
     }
     end(reason) { this.state = 'result'; this.endReason = reason; this.emit(reason); this.result = this.results(); for (const h of this.world.holds) this.world.release(h, 'end'); }
     results() {

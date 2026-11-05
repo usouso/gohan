@@ -12,6 +12,7 @@
   #topbar, #bottombar { flex: 0 0 auto; min-height: 60px; background: var(--bar); color: #f3eadb; display: flex; align-items: center; gap: 14px; padding: 6px 16px; font-size: 20px; }
   #topbar { border-bottom: 2px solid #4a3b2e; }
   #bottombar { border-top: 2px solid #4a3b2e; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  #padbar { flex: 0 0 auto; background: #231c17; color: #f3eadb; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 4px 16px; font-size: 18px; border-top: 1px solid #4a3b2e; }
   #menuText { font-weight: 700; white-space: nowrap; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   #status { flex: 1 1 120px; min-width: 0; text-align: center; font-size: 22px; color: #ffe2a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #timer { font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
@@ -78,7 +79,7 @@
           <div class="goal"><span class="ic">😮‍💨</span>むせない・骨を飲まない</div>
         </div>
         <div class="row">
-          <div class="note">食べる人・料理・食器は、毎回ランダム。パソコン（マウスとキーボード）で遊ぶ。</div>
+          <div class="note">食べる人・料理・食器は、毎回ランダム。パソコンで遊ぶ（マウス＋キーボード、またはゲームパッド）。</div>
           <button id="btnStart">はじめる ▶</button>
         </div>
       </div>
@@ -119,7 +120,18 @@
     <span class="chip"><kbd>J</kbd>噛む</span>
     <span class="chip"><kbd>K</kbd>舌で奥へ</span>
     <span class="chip"><kbd>L</kbd>飲みこむ</span>
-    <span class="chip"><kbd>I</kbd>吸う</span>
+    <span class="chip" id="chipSlurp"><kbd>I</kbd>吸う</span>
+  </div>
+  <div id="padbar" style="display:none">
+    <span class="chip"><kbd>左スティック</kbd>手</span>
+    <span class="chip"><kbd>右スティック</kbd>食器のかたむき</span>
+    <span class="chip"><kbd>RT / RB</kbd>つかむ</span>
+    <span class="chip"><kbd>A</kbd>口を開ける</span>
+    <span class="chip"><kbd>X</kbd>噛む</span>
+    <span class="chip"><kbd>Y</kbd>舌で奥へ</span>
+    <span class="chip"><kbd>B</kbd>飲みこむ</span>
+    <span class="chip" id="padChipSlurp"><kbd>LT / LB</kbd>吸う</span>
+    <span class="chip"><kbd>Start</kbd>ごちそうさま</span>
   </div>
 </div>
 <script src="src/engine.js"></script>

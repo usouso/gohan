@@ -47,6 +47,11 @@
           case 'spill_clothes': burst({ f0: 500, f1: 200, q: 1, dur: .08, vol: .2 }); break;
           case 'grab': burst({ f0: 1800, f1: 1200, q: 3, dur: .02, vol: .08 }); break;
           case 'escaped': tone({ f0: 500, f1: 900, dur: .3, vol: .12 }); break;
+          case 'fire': burst({ f0: 250, f1: 900, q: .6, dur: .5, vol: .4, type: 'lowpass' }); break;
+          case 'charred': burst({ f0: 1500, f1: 400, q: 1, dur: .12, vol: .25 }); break;
+          case 'tear': burst({ f0: 900, f1: 300, q: 1.2, dur: .06, vol: .22 }); break;
+          case 'bite_off': burst({ f0: 700, f1: 200, q: 1, dur: .1, vol: .35 }); break;
+          case 'tusk': burst({ f0: 500, f1: 150, q: .8, dur: .14, vol: .45 }); break;
           case 'finished': tone({ f0: 523, dur: .25, vol: .25 }); tone({ f0: 659, dur: .25, vol: .25, delay: .15 }); tone({ f0: 784, dur: .5, vol: .28, delay: .3 }); break;
           case 'full': tone({ f0: 330, f1: 220, dur: .5, vol: .25 }); break;
           case 'slurp_start': {

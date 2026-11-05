@@ -141,6 +141,7 @@
         const s = this.sprite(p.mat, p.r, p.mash); const sh = p.mat.shape;
         if (sh === 'grain' || sh === 'flat' || sh === 'cube') { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot + (sh === 'cube' ? 0 : 0)); ctx.drawImage(s.c, -s.size / 2, -s.size / 2); ctx.restore(); }
         else ctx.drawImage(s.c, p.x - s.size / 2, p.y - s.size / 2);
+        if (p.roast > .4) { const k = Math.min(1, (p.roast - .4) / 1.8); ctx.fillStyle = p.roast >= 2.2 ? 'rgba(20,12,8,.82)' : 'rgba(90,45,10,' + (.12 + .45 * k).toFixed(2) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 1.02, 0, Math.PI * 2); ctx.fill(); }
       }
     }
     // ---- 食べる人 ----
@@ -239,6 +240,18 @@
       if (L.horns) { ctx.fillStyle = '#e9dcc0'; ctx.strokeStyle = '#8d7b5a'; ctx.lineWidth = 2; for (const [bx, by, dir] of [[450 * hp.s, -350 * hp.s, 1], [540 * hp.s, -330 * hp.s, 1]]) { ctx.beginPath(); ctx.moveTo(bx - 20 * hp.s, by + 10); ctx.quadraticCurveTo(bx + 60 * hp.s * dir, by - 120 * hp.s, bx + 120 * hp.s * dir, by - 170 * hp.s); ctx.quadraticCurveTo(bx + 80 * hp.s * dir, by - 60 * hp.s, bx + 30 * hp.s, by + 14); ctx.closePath(); ctx.fill(); ctx.stroke(); } }
       // 吸っている時の線
       if (game.slurpOn) { ctx.strokeStyle = 'rgba(80,80,120,.5)'; ctx.lineWidth = 2.5; for (let i = 0; i < 3; i++) { const yy = (i - 1) * 16 * hs; const ph = (game.time * 6 + i) % 1; ctx.beginPath(); ctx.moveTo(-120 * hs + ph * 60, yy * (1 + ph)); ctx.lineTo(-80 * hs + ph * 60, yy * (1 + ph * .5)); ctx.stroke(); } }
+      // ドラゴンの炎
+      if (game.fireOn) {
+        ctx.save(); const L = 300 * hs, t = game.time;
+        for (let i = 0; i < 3; i++) {
+          const col = ['rgba(200,40,10,.75)', 'rgba(255,120,20,.8)', 'rgba(255,220,90,.85)'][i]; const len = L * (1 - i * .25) * (.9 + .1 * Math.sin(t * 23 + i)); const wid = (24 * hs + len * .32) * (1 - i * .3);
+          ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(-6 * hs, 0);
+          for (let k = 0; k <= 8; k++) { const f = k / 8; ctx.lineTo(-6 * hs - len * f, -wid * f * (1 + .25 * Math.sin(t * 31 + f * 9 + i))); }
+          for (let k = 8; k >= 0; k--) { const f = k / 8; ctx.lineTo(-6 * hs - len * f, wid * f * (1 + .25 * Math.cos(t * 29 + f * 7 + i))); }
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+      }
       ctx.restore();
     }
     drawHair(ctx, game, hp) {
