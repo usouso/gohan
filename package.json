@@ -1,0 +1,20 @@
+{
+  "name": "gohan",
+  "version": "1.0.0",
+  "description": "きょうのごはん — 食べる動作の物理ゲーム",
+  "main": "index.js",
+  "scripts": {
+    "bot": "node bot/run.js",
+    "bot:all": "node bot/run.js --all --seeds 1",
+    "check": "node tools/check.js",
+    "serve": "node serve.js 8765"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "puppeteer-core": "^24.43.1"
+  },
+  "private": true
+}

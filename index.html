@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>きょうのごはん</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --ink: #2b1f17; --paper: #f7efe2; --accent: #c8542a; --accent2: #3f7d5a; --bar: #2a221c; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #1a140f; color: var(--ink); font-family: "Noto Sans JP", "Yu Gothic UI", "Meiryo", "Hiragino Sans", sans-serif; font-size: 20px; }
+  #app { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+  #topbar, #bottombar { flex: 0 0 auto; min-height: 60px; background: var(--bar); color: #f3eadb; display: flex; align-items: center; gap: 14px; padding: 6px 16px; font-size: 20px; }
+  #topbar { border-bottom: 2px solid #4a3b2e; }
+  #bottombar { border-top: 2px solid #4a3b2e; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  #menuText { font-weight: 700; white-space: nowrap; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  #status { flex: 1 1 120px; min-width: 0; text-align: center; font-size: 22px; color: #ffe2a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #timer { font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
+  .meter { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  #fullBar { width: 120px; height: 18px; background: #4a3b2e; border-radius: 9px; overflow: hidden; }
+  #fullFill { height: 100%; width: 0%; background: linear-gradient(90deg, #e9b44c, #c8542a); transition: width .2s; }
+  #volWrap input { width: 90px; vertical-align: middle; }
+  button { font: inherit; font-size: 22px; padding: 10px 26px; border-radius: 12px; border: 0; cursor: pointer; background: var(--accent); color: #fff; font-weight: 700; box-shadow: 0 3px 0 #8a3418; }
+  button:active { transform: translateY(2px); box-shadow: none; }
+  button.quiet { background: #5a4a3c; box-shadow: 0 3px 0 #332a21; }
+  #btnFinish { font-size: 18px; padding: 8px 16px; }
+  #stage { flex: 1 1 auto; position: relative; display: flex; align-items: center; justify-content: center; background: #1a140f; min-height: 0; }
+  #cv { display: block; cursor: crosshair; }
+  .screen { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(20, 14, 10, .55); }
+  .card { background: var(--paper); border-radius: 18px; padding: 20px 36px; box-shadow: 0 12px 40px rgba(0,0,0,.45); max-width: 1180px; width: min(94%, 1180px); max-height: 96%; overflow: auto; }
+  h1 { margin: 0 0 6px; font-size: 54px; letter-spacing: .04em; }
+  h2 { margin: 0 0 14px; font-size: 32px; }
+  .sub { font-size: 22px; color: #5a4a3c; margin-bottom: 18px; }
+  .goals { display: flex; gap: 18px; margin: 14px 0 22px; }
+  .goal { flex: 1; background: #fff8ec; border: 2px solid #e4d5bd; border-radius: 14px; padding: 14px 16px; font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+  .goal span.ic { font-size: 34px; }
+  .cards3 { display: flex; gap: 18px; margin: 10px 0 22px; }
+  .rv { flex: 1; background: #fff8ec; border: 2px solid #e4d5bd; border-radius: 14px; padding: 16px 18px; min-height: 150px; }
+  .rv .k { font-size: 18px; color: #7a6a5a; margin-bottom: 4px; }
+  .rv .v { font-size: 30px; font-weight: 700; margin-bottom: 6px; }
+  .rv .d { font-size: 20px; color: #4a3f36; line-height: 1.45; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .scores { display: flex; gap: 18px; margin: 8px 0 10px; }
+  .score { flex: 1; background: #fff8ec; border: 2px solid #e4d5bd; border-radius: 14px; padding: 6px 16px; text-align: center; }
+  .score .k { font-size: 20px; color: #7a6a5a; }
+  .score .v { font-size: 44px; font-weight: 800; line-height: 1.35; margin-top: 2px; }
+  #rsLabels { display: flex; gap: 12px; flex-wrap: wrap; margin: 4px 0 10px; }
+  .label { background: var(--accent2); color: #fff; font-size: 24px; font-weight: 700; padding: 6px 18px; border-radius: 999px; }
+  #rsLine { font-size: 28px; font-weight: 700; margin: 4px 0 6px; }
+  #rsTable { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; row-gap: 0; font-size: 19px; }
+  #rsTable .r { display: flex; justify-content: space-between; gap: 10px; padding: 3px 4px; border-bottom: 1px solid #e4d5bd; }
+  #rsTable .r b { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: #3b3028; border-radius: 10px; padding: 6px 12px; font-size: 19px; white-space: nowrap; }
+  .chip kbd { background: #f3eadb; color: #2a221c; border-radius: 6px; padding: 2px 8px; font-size: 18px; font-weight: 700; font-family: inherit; }
+  .note { font-size: 19px; color: #6a5a4a; }
+  @media (max-width: 1400px) { .chip { font-size: 17px; padding: 4px 9px; } .chip kbd { font-size: 16px; } #topbar { font-size: 18px; gap: 10px; } #status { font-size: 19px; } #btnFinish { font-size: 16px; padding: 6px 12px; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div id="menuText">きょうのごはん</div>
+    <div id="status"></div>
+    <div class="meter">食べた <b id="eatenNum">0%</b></div>
+    <div class="meter">おなか <div id="fullBar"><div id="fullFill"></div></div><span id="fullNum">0%</span></div>
+    <div id="timer">0:00</div>
+    <div id="volWrap" class="meter">音 <input id="vol" type="range" min="0" max="100" value="35"></div>
+    <button id="btnFinish" class="quiet">ごちそうさま</button>
+  </div>
+  <div id="stage">
+    <canvas id="cv" width="1600" height="760"></canvas>
+    <div id="title" class="screen">
+      <div class="card">
+        <h1>きょうのごはん</h1>
+        <div class="sub">人や、ふしぎな生きものが、その日のごはんを食べる。手・箸・口・あご・のど、ぜんぶ自分で動かす。</div>
+        <div class="goals">
+          <div class="goal"><span class="ic">🍚</span>料理を食べきる</div>
+          <div class="goal"><span class="ic">🧹</span>こぼさない</div>
+          <div class="goal"><span class="ic">😮‍💨</span>むせない・骨を飲まない</div>
+        </div>
+        <div class="row">
+          <div class="note">食べる人・料理・食器は、毎回ランダム。パソコン（マウスとキーボード）で遊ぶ。</div>
+          <button id="btnStart">はじめる ▶</button>
+        </div>
+      </div>
+    </div>
+    <div id="reveal" class="screen">
+      <div class="card">
+        <h2>本日の食卓</h2>
+        <div class="cards3">
+          <div class="rv"><div class="k">食べる人</div><div class="v" id="rvDinerName"></div><div class="d" id="rvDinerSub"></div></div>
+          <div class="rv"><div class="k">料理</div><div class="v" id="rvDishName"></div><div class="d" id="rvDishDesc"></div></div>
+          <div class="rv"><div class="k">食器</div><div class="v" id="rvUtensil"></div><div class="d" id="rvUtensilNote"></div></div>
+        </div>
+        <div class="row"><div class="note" id="rvSeed"></div><button id="btnGo">いただきます</button></div>
+      </div>
+    </div>
+    <div id="result" class="screen">
+      <div class="card">
+        <h2 id="rsReason">ごちそうさま</h2>
+        <div class="note" id="rsWho"></div>
+        <div id="rsLine"></div>
+        <div class="scores">
+          <div class="score"><div class="k">満足</div><div class="v" id="rsSat">0</div></div>
+          <div class="score"><div class="k">きれい</div><div class="v" id="rsClean">0</div></div>
+          <div class="score"><div class="k">マナー</div><div class="v" id="rsMan">0</div></div>
+        </div>
+        <div class="note">この人の食べ方</div>
+        <div id="rsLabels"></div>
+        <div id="rsTable"></div>
+        <div class="row" style="margin-top:12px"><button id="btnSame" class="quiet">同じ食卓でもう一回</button><button id="btnAgain">別の食卓で　もう一回 ▶</button></div>
+      </div>
+    </div>
+  </div>
+  <div id="bottombar">
+    <span class="chip"><kbd>マウス</kbd>手を動かす</span>
+    <span class="chip"><kbd>ホイール / A D</kbd>食器のかたむき</span>
+    <span class="chip"><kbd>左クリック</kbd>つかむ</span>
+    <span class="chip"><kbd>右クリック / Space</kbd>口を開ける</span>
+    <span class="chip"><kbd>J</kbd>噛む</span>
+    <span class="chip"><kbd>K</kbd>舌で奥へ</span>
+    <span class="chip"><kbd>L</kbd>飲みこむ</span>
+    <span class="chip"><kbd>I</kbd>吸う</span>
+  </div>
+</div>
+<script src="src/engine.js"></script>
+<script src="src/food.js"></script>
+<script src="src/diners.js"></script>
+<script src="src/game.js"></script>
+<script src="src/bot.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/render.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

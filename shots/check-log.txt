@@ -1,0 +1,4 @@
+[1920x910] 失敗  errors=0 overlaps=5 overflow=2 scroll=0 finished=true end=timeout eaten=4% time=240s diner=bold dish=bonefish utensil=hashi
+  重なり/はみ出し: 満足 × 6 | きれい × 0 | マナー × 100 | 箸からこぼれた × ホイール / A D | 410回 × 舌で奥へ | はみ出し:同じ食卓でもう一回 | はみ出し:別の食卓で　もう一回 ▶
+[1366x650] 失敗  errors=0 overlaps=410 overflow=1639 scroll=0 finished=true end=timeout eaten=4% time=240s diner=bold dish=bonefish utensil=hashi
+  重なり/はみ出し: はみ出し:マウス | はみ出し:I | はみ出し:吸う | 我の供物か。食ろうてやる。 × 食べた | 我の供物か。食ろうてやる。 × 0% | ぽろっ……落とした × 食べた | テーブルにこぼした × 食べた | 満足 × 6 | きれい × 0 | マナー × 100
