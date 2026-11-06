@@ -44,7 +44,7 @@
     }
     layout() {
       const d = this.diner; this.tableY = TABLE_Y;
-      this.mainX = 640; this.sideX = 905; this.wideX = 720;
+      this.mainX = 640; this.sideX = 890; this.wideX = 720;   // 試作3.1: 器を小さくしたので奥の皿を少し手前に
       let shoulderX = clamp(this.mainX + d.reach * .72, 900, 1420);
       if (d.kind === 'fairy') { this.shoulder = { x: shoulderX, y: TABLE_Y - 150 }; this.mouth = { x: shoulderX - 62, y: this.shoulder.y - 48 }; }
       else if (d.kind === 'dragon') { this.shoulder = { x: shoulderX, y: TABLE_Y - 30 - 60 * d.hs }; this.mouth = { x: shoulderX - 300 * d.hs, y: this.shoulder.y - 150 * d.hs }; }

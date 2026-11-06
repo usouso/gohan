@@ -1,0 +1,2 @@
+[1920x910] 合格  errors=0 overlaps=0 overflow=0 scroll=0 finished=true end=finished eaten=90% time=305s diner=bold dish=bonefish utensil=hashi
+[1366x650] 合格  errors=0 overlaps=0 overflow=0 scroll=0 finished=true end=finished eaten=90% time=305s diner=bold dish=bonefish utensil=hashi

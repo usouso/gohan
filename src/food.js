@@ -49,15 +49,16 @@
   };
   for (const k in MAT) { MAT[k].key = k; if (MAT[k].cohesion === undefined) MAT[k].cohesion = 0; if (MAT[k].edible === undefined) MAT[k].edible = !MAT[k].bone; }
 
-  // 食器（横から見た断面）
+  // 食器（横から見た断面）。試作3.1で全部小さくした（量が半分なので器が空っぽに見えた。量はそのままで器を満たして見せる）。
+  // 試作1〜3の寸法: 茶碗 230/100/110、丼 330/150/150、お椀 220/95/100、皿 360/270/34、深皿 380/260/64、石 300/160/120、木 360/220/80（wTop/wBot/h）
   const VESSELS = {
-    chawan:   { name: '茶碗', wTop: 230, wBot: 100, h: 110, foot: 10, curve: .75, segR: 5, glaze: '#eef0f2', glazeDark: '#aeb7bf', rim: '#ffffff', pattern: 'blue' },
-    don:      { name: '丼', wTop: 330, wBot: 150, h: 150, foot: 12, curve: .7, segR: 6, glaze: '#34405c', glazeDark: '#161c2e', rim: '#d8dde8' },
-    owan:     { name: 'お椀', wTop: 220, wBot: 95, h: 100, foot: 12, curve: .72, segR: 5, glaze: '#3a2016', glazeDark: '#120905', rim: '#a2362a', inner: '#9b2d1e' },
-    sara:     { name: '皿', wTop: 360, wBot: 270, h: 34, foot: 6, curve: 1.2, segR: 4, glaze: '#f4f1ea', glazeDark: '#bdb6a8', rim: '#ffffff' },
-    fukazara: { name: '深皿', wTop: 380, wBot: 260, h: 64, foot: 8, curve: 1.0, segR: 5, glaze: '#f1ece2', glazeDark: '#b4ab9b', rim: '#ffffff' },
-    ishi:     { name: '石の器', wTop: 300, wBot: 160, h: 120, foot: 14, curve: .6, segR: 8, glaze: '#6e6e69', glazeDark: '#34342f', rim: '#8d8d86' },
-    ki:       { name: '木の器', wTop: 360, wBot: 220, h: 80, foot: 10, curve: .8, segR: 7, glaze: '#8a5a2b', glazeDark: '#4a2c12', rim: '#b98350' },
+    chawan:   { name: '茶碗', wTop: 166, wBot: 72, h: 79, foot: 10, curve: .75, segR: 5, glaze: '#eef0f2', glazeDark: '#aeb7bf', rim: '#ffffff', pattern: 'blue' },
+    don:      { name: '丼', wTop: 244, wBot: 111, h: 111, foot: 12, curve: .7, segR: 6, glaze: '#34405c', glazeDark: '#161c2e', rim: '#d8dde8' },
+    owan:     { name: 'お椀', wTop: 163, wBot: 70, h: 74, foot: 12, curve: .72, segR: 5, glaze: '#3a2016', glazeDark: '#120905', rim: '#a2362a', inner: '#9b2d1e' },
+    sara:     { name: '皿', wTop: 306, wBot: 230, h: 34, foot: 6, curve: 1.2, segR: 4, glaze: '#f4f1ea', glazeDark: '#bdb6a8', rim: '#ffffff' },
+    fukazara: { name: '深皿', wTop: 285, wBot: 194, h: 58, foot: 8, curve: 1.0, segR: 5, glaze: '#f1ece2', glazeDark: '#b4ab9b', rim: '#ffffff' },
+    ishi:     { name: '石の器', wTop: 255, wBot: 136, h: 102, foot: 14, curve: .6, segR: 8, glaze: '#6e6e69', glazeDark: '#34342f', rim: '#8d8d86' },
+    ki:       { name: '木の器', wTop: 306, wBot: 186, h: 68, foot: 10, curve: .8, segR: 7, glaze: '#8a5a2b', glazeDark: '#4a2c12', rim: '#b98350' },
   };
 
   function makeVessel(type, cx, tableY) {
@@ -179,9 +180,13 @@
     }
     return out;
   }
-  function buildChain(world, x, y, part, rng) {
+  function buildChain(world, x, y, part, rng, ok) {   // ok(x,y)=器の中なら true（小さい器では鎖が壁の外に出ていた。試作3.1）
     const mat = MAT[part.mat]; const r = part.r || mat.r; const cl = clusterId++; const pts = []; let h = rng.range(0, Math.PI * 2);
-    for (let i = 0; i < part.len; i++) { pts.push({ x, y }); h += rng.range(-.6, .6); x += Math.cos(h) * r * 2 * .9; y += Math.sin(h) * r * 2 * .9; }
+    for (let i = 0; i < part.len; i++) {
+      pts.push({ x, y }); let placed = false;
+      for (let t = 0; t < 8 && !placed; t++) { const nh = h + rng.range(-.6, .6); const nx = x + Math.cos(nh) * r * 2 * .9, ny = y + Math.sin(nh) * r * 2 * .9; if (!ok || ok(nx, ny)) { x = nx; y = ny; h = nh; placed = true; } else h += Math.PI * .6; }
+      if (!placed) break;
+    }
     const ps = addParticles(world, mat, pts, r, cl);
     for (let i = 0; i < ps.length - 1; i++) world.link(ps[i], ps[i + 1], mat.stiff, mat.breakAt);
     for (let i = 0; i < ps.length - 2; i++) world.link(ps[i], ps[i + 2], .3, mat.breakAt * 1.3);
@@ -191,23 +196,23 @@
   // 料理の定義。vessels の slot は配置の種類（main=手前の器、side=奥の皿、wide=大皿ひとつ）。utensils は食器が選ばれる重み。
   const DISHES = [
     { id: 'sake', name: '白ごはんと焼き鮭', desc: 'ふっくらごはんと、骨のある塩鮭。骨をよけて食べる。', kind: 'real', utensils: { hashi: 70, spoon: 10, fork: 12, hand: 8 }, natural: ['hashi'],
-      vessels: [{ slot: 'main', type: 'chawan', parts: [{ kind: 'fill', mat: 'rice', level: .42, dome: 16 }] },
+      vessels: [{ slot: 'main', type: 'chawan', parts: [{ kind: 'fill', mat: 'rice', level: .8, dome: 12 }] },
                 { slot: 'side', type: 'sara', parts: [{ kind: 'fish', flesh: 'salmon', skin: 'fishSkin', rx: 70, ry: 20, ribs: 'normal' }] }] },
     { id: 'miso', name: '豆腐とわかめの味噌汁', desc: 'あつい汁に、やわらかい豆腐とわかめ。箸では汁がすくえない。', kind: 'real', utensils: { hashi: 35, spoon: 45, fork: 8, hand: 12 }, natural: ['spoon'],
-      vessels: [{ slot: 'main', type: 'owan', parts: [{ kind: 'liquid', mat: 'miso', level: .5 }, { kind: 'blob', mat: 'tofu', n: 2, rx: 13, ry: 13, r: 6.5, place: 'float' }, { kind: 'chain', mat: 'wakame', n: 3, len: 5, r: 4, place: 'float' }, { kind: 'singles', mat: 'negi', n: 4, r: 3.5, place: 'float' }] }] },
+      vessels: [{ slot: 'main', type: 'owan', parts: [{ kind: 'liquid', mat: 'miso', level: .76 }, { kind: 'blob', mat: 'tofu', n: 2, rx: 13, ry: 13, r: 6.5, place: 'float' }, { kind: 'chain', mat: 'wakame', n: 3, len: 5, r: 4, place: 'float' }, { kind: 'singles', mat: 'negi', n: 4, r: 3.5, place: 'float' }] }] },
     { id: 'ramen', name: 'しょうゆラーメン', desc: '麺はすすって食べる。チャーシューと、半分の玉子。', kind: 'real', utensils: { hashi: 65, spoon: 15, fork: 15, hand: 5 }, natural: ['hashi'], slurpOk: true,
-      vessels: [{ slot: 'main', type: 'don', parts: [{ kind: 'liquid', mat: 'broth', level: .46 }, { kind: 'noodles', mat: 'noodle', n: 6, len: 14, r: 5 }, { kind: 'blob', mat: 'chashu', n: 1, rx: 30, ry: 11, r: 6.5, place: 'top' }, { kind: 'blob', mat: 'eggWhite', n: 1, rx: 24, ry: 15, r: 6, core: 'yolk', coreR: 11, coreRy: 8, place: 'top' }, { kind: 'chain', mat: 'menma', n: 2, len: 4, r: 4.5, place: 'top' }] }] },
+      vessels: [{ slot: 'main', type: 'don', parts: [{ kind: 'liquid', mat: 'broth', level: .72 }, { kind: 'noodles', mat: 'noodle', n: 6, len: 14, r: 5 }, { kind: 'blob', mat: 'chashu', n: 1, rx: 30, ry: 11, r: 6.5, place: 'top' }, { kind: 'blob', mat: 'eggWhite', n: 1, rx: 24, ry: 15, r: 6, core: 'yolk', coreR: 11, coreRy: 8, place: 'top' }, { kind: 'chain', mat: 'menma', n: 2, len: 4, r: 4.5, place: 'top' }] }] },
     { id: 'curry', name: 'カレーライス', desc: 'とろみのあるルーと、ごろっとしたじゃがいも。', kind: 'real', utensils: { hashi: 15, spoon: 70, fork: 10, hand: 5 }, natural: ['spoon'],
-      vessels: [{ slot: 'wide', type: 'fukazara', parts: [{ kind: 'fill', mat: 'rice', level: .4, dome: 6, xRange: [.04, .52] }, { kind: 'liquid', mat: 'curry', level: .44, xRange: [.5, .97] }, { kind: 'blob', mat: 'potato', n: 1, rx: 16, ry: 14, r: 7, place: 'float', xRange: [.56, .94] }, { kind: 'blob', mat: 'beef', n: 2, rx: 12, ry: 10, r: 6.5, place: 'float', xRange: [.56, .94] }] }] },
+      vessels: [{ slot: 'wide', type: 'fukazara', parts: [{ kind: 'fill', mat: 'rice', level: .45, dome: 6, xRange: [.04, .52] }, { kind: 'liquid', mat: 'curry', level: .55, xRange: [.5, .97] }, { kind: 'blob', mat: 'potato', n: 1, rx: 16, ry: 14, r: 7, place: 'float', xRange: [.56, .94] }, { kind: 'blob', mat: 'beef', n: 2, rx: 12, ry: 10, r: 6.5, place: 'float', xRange: [.56, .94] }] }] },
     { id: 'gyoza', name: '焼き餃子', desc: '皮はもちっと、中は肉汁。かじるか、丸ごとか。', kind: 'real', utensils: { hashi: 65, spoon: 5, fork: 15, hand: 15 }, natural: ['hashi', 'hand'],
       vessels: [{ slot: 'wide', type: 'sara', parts: [{ kind: 'blob', mat: 'gyozaFill', skin: 'gyozaSkin', n: 3, rx: 28, ry: 13, r: 6, skinR: 4.5, place: 'top' }] }] },
     { id: 'onigiri', name: 'のりむすびと、たくあん', desc: '手で持ってかじるのが正解。箸でもできる……かも。', kind: 'real', utensils: { hashi: 25, spoon: 5, fork: 10, hand: 60 }, natural: ['hand'],
       vessels: [{ slot: 'wide', type: 'sara', parts: [{ kind: 'blob', mat: 'onigiri', skin: 'nori', n: 1, rx: 46, ry: 38, r: 6.5, skinR: 4, place: 'top' }, { kind: 'blob', mat: 'takuan', n: 2, rx: 10, ry: 9, r: 5.5, place: 'top', xRange: [.72, .95] }] }] },
     { id: 'tonkatsu', name: 'とんかつ定食', desc: '衣はザクッ、肉は厚い。よく噛む。', kind: 'real', utensils: { hashi: 65, spoon: 5, fork: 20, hand: 10 }, natural: ['hashi', 'fork'],
-      vessels: [{ slot: 'main', type: 'chawan', parts: [{ kind: 'fill', mat: 'rice', level: .4, dome: 14 }] },
+      vessels: [{ slot: 'main', type: 'chawan', parts: [{ kind: 'fill', mat: 'rice', level: .8, dome: 10 }] },
                 { slot: 'side', type: 'sara', parts: [{ kind: 'blob', mat: 'pork', skin: 'koromo', n: 3, rx: 19, ry: 14, r: 6.5, skinR: 4.5, place: 'top' }] }] },
     { id: 'udon', name: 'きつねうどん', desc: '太くてつるつるの麺。あまいおあげ。', kind: 'real', utensils: { hashi: 60, spoon: 20, fork: 15, hand: 5 }, natural: ['hashi'], slurpOk: true,
-      vessels: [{ slot: 'main', type: 'don', parts: [{ kind: 'liquid', mat: 'dashi', level: .44 }, { kind: 'noodles', mat: 'udon', n: 4, len: 12, r: 6.5 }, { kind: 'blob', mat: 'age', n: 1, rx: 34, ry: 9, r: 6, place: 'top' }, { kind: 'singles', mat: 'negi', n: 3, r: 3.5, place: 'top' }] }] },
+      vessels: [{ slot: 'main', type: 'don', parts: [{ kind: 'liquid', mat: 'dashi', level: .78 }, { kind: 'noodles', mat: 'udon', n: 4, len: 12, r: 6.5 }, { kind: 'blob', mat: 'age', n: 1, rx: 34, ry: 9, r: 6, place: 'top' }, { kind: 'singles', mat: 'negi', n: 3, r: 3.5, place: 'top' }] }] },
     { id: 'dragon_egg', name: 'ドラゴンのたまごのオムレツ', desc: 'まくらほどの大きさ。中から金色の黄身がとろりと流れる。', kind: 'fantasy', utensils: { hashi: 30, spoon: 25, fork: 35, hand: 10 }, natural: ['fork', 'spoon'],
       vessels: [{ slot: 'wide', type: 'fukazara', parts: [{ kind: 'blob', mat: 'omelet', n: 1, rx: 86, ry: 30, r: 7.5, core: 'yolkGold', coreR: 44, coreRy: 11, place: 'top' }] }] },
     { id: 'slime', name: 'スライムゼリー', desc: 'つかんでも、ぬるっと逃げる。ぷるぷる。', kind: 'fantasy', utensils: { hashi: 35, spoon: 40, fork: 15, hand: 10 }, natural: ['spoon'],
@@ -219,7 +224,7 @@
     { id: 'bread', name: '巨人のパン', desc: 'かたい皮、ぎっしりの中身。かじりとるしかない。', kind: 'fantasy', utensils: { hashi: 20, spoon: 5, fork: 20, hand: 55 }, natural: ['hand'],
       vessels: [{ slot: 'wide', type: 'ki', parts: [{ kind: 'blob', mat: 'bread', skin: 'crust', n: 1, rx: 78, ry: 36, r: 8, skinR: 6, place: 'bottom' }] }] },
     { id: 'stew', name: '火トカゲのシチュー', desc: '骨つきの肉がごろごろ。にんじんも。', kind: 'fantasy', utensils: { hashi: 20, spoon: 55, fork: 20, hand: 5 }, natural: ['spoon'],
-      vessels: [{ slot: 'main', type: 'ishi', parts: [{ kind: 'liquid', mat: 'stew', level: .48 }, { kind: 'blob', mat: 'lizardMeat', n: 2, rx: 16, ry: 12, r: 7, place: 'float', bone: true }, { kind: 'blob', mat: 'carrot', n: 2, rx: 9, ry: 9, r: 6, place: 'float' }] }] },
+      vessels: [{ slot: 'main', type: 'ishi', parts: [{ kind: 'liquid', mat: 'stew', level: .74 }, { kind: 'blob', mat: 'lizardMeat', n: 2, rx: 16, ry: 12, r: 7, place: 'float', bone: true }, { kind: 'blob', mat: 'carrot', n: 2, rx: 9, ry: 9, r: 6, place: 'float' }] }] },
   ];
 
   // 料理を器に盛る。vessels は slot ごとの makeVessel の結果。
@@ -243,24 +248,27 @@
           const pos = hexFill(vessel, mat.r, () => lv, part.xRange); const ps = addParticles(world, mat, pos, mat.r, clusterId++);
           const old = surfaceY; surfaceY = x => Math.min(old(x), lv); all.push(...ps);
         } else if (part.kind === 'blob' || part.kind === 'chain' || part.kind === 'singles') {
-          const n = part.n || 1; const rx0 = part.xRange ? vessel.left + (vessel.right - vessel.left) * part.xRange[0] : vessel.left + 40;
-          const rx1 = part.xRange ? vessel.left + (vessel.right - vessel.left) * part.xRange[1] : vessel.right - 40;
+          const n = part.n || 1; const mg = (vessel.right - vessel.left) * .11;   // ふちからの余白（器の幅に比例。固定 40px だと小さい皿に 3 つ並ばない）
+          const rx0 = part.xRange ? vessel.left + (vessel.right - vessel.left) * part.xRange[0] : vessel.left + mg;
+          const rx1 = part.xRange ? vessel.left + (vessel.right - vessel.left) * part.xRange[1] : vessel.right - mg;
           const halfW = part.kind === 'blob' ? part.rx : (part.r || MAT[part.mat].r) * 2;
           for (let i = 0; i < n; i++) {
             const x = n === 1 ? (rx0 + rx1) / 2 : rx0 + halfW + (rx1 - rx0 - halfW * 2) * (i + .5) / n + rng.range(-6, 6);
             let y;
             const ry = part.kind === 'blob' ? part.ry : (part.r || MAT[part.mat].r);
-            if (part.place === 'float' && levelY !== null) y = rng.range(levelY + ry + 6, vessel.bottom - ry - 10);
-            else if (part.place === 'bottom') y = vessel.bottom - vessel.def.segR - ry - 2;
-            else y = surfaceY(x) - ry - 4;
+            const over = part.skin ? (part.skinR || MAT[part.skin].r) * .4 : 0;   // 皮の粒は ry より少し外に出る
+            const inside = yy => E.pointInPoly(x - halfW * .8, yy, vessel.poly) && E.pointInPoly(x + halfW * .8, yy, vessel.poly);
+            if (part.place === 'float' && levelY !== null) { y = rng.range(levelY + ry + 6, vessel.bottom - ry - 10); while (!inside(y) && y > levelY + ry) y -= 3; }   // 器のすぼまりの外に置かない（試作3.1）
+            else if (part.place === 'bottom') y = vessel.bottom - vessel.def.segR - ry - over - 2;
+            else y = surfaceY(x) - ry - over - 4 - (surfaceY(x) >= vessel.bottom ? vessel.def.segR : 0);   // 器の底に直に置くときは壁の厚みぶん上げる（のりが皿を突き抜けていた。試作3.1）
             if (part.kind === 'blob') { const ps = buildBlob(world, x, y, part, rng); all.push(...ps); if (part.bone) { const b = addParticles(world, MAT.bone, [{ x: x - 4, y }, { x: x + 4, y }], 3.2, ps[0].cl); world.link(b[0], b[1], 1, 0); for (const bb of b) for (const q of nearest(ps, bb.x, bb.y, 3)) world.link(bb, q, .4, 1.3); all.push(...b); } }
-            else if (part.kind === 'chain') all.push(...buildChain(world, x, y, part, rng));
+            else if (part.kind === 'chain') { const cr = part.r || MAT[part.mat].r; const okC = (px, py) => E.pointInPoly(px, py, vessel.poly) && clearOf(px, py, cr, vessel.segs) && py > vessel.top + cr; all.push(...buildChain(world, x, y, part, rng, okC)); }
             else { const mat = MAT[part.mat]; all.push(...addParticles(world, mat, [{ x, y }], part.r || mat.r, clusterId++)); }
           }
         } else if (part.kind === 'noodles') {
           all.push(...buildNoodles(world, vessel, part, levelY === null ? vessel.top : levelY, rng));
         } else if (part.kind === 'fish') {
-          const cy = vessel.bottom - vessel.def.segR - part.ry - 3; all.push(...buildFish(world, vessel.cx, cy, part, rng));
+          const cy = vessel.bottom - vessel.def.segR - part.ry - 6; all.push(...buildFish(world, vessel.cx, cy, part, rng));   // 少し浮かせて置く（骨が皿に食い込まない。試作3.1）
         }
       }
     }

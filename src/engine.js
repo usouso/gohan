@@ -116,7 +116,7 @@
       for (const p of this.particles) {
         if (p.dead) continue;
         const dd = p.damp || d;
-        let vx = (p.x - p.px) * dd, vy = (p.y - p.py) * dd; p.px = p.x; p.py = p.y;
+        let vx = (p.x - p.px) * dd, vy = (p.y - p.py) * dd; p.px = p.x; p.py = p.y; p.ox = p.x; p.oy = p.y;   // ox,oy=このサブステップの始めの位置（壁のすり抜け判定用。px,py は当たりのたびに書き換わる）
         const sp = vx * vx + vy * vy; if (sp > this.maxV * this.maxV) { const f = this.maxV / Math.sqrt(sp); vx *= f; vy *= f; }
         p.x += vx + p.ax * h * h; p.y += vy + (p.ay + g * p.g) * h * h; p.ax = 0; p.ay = 0; p.ix = p.x; p.iy = p.y;
         if (p.y > this.killY) this.kill(p, 'fell');
@@ -164,7 +164,7 @@
       }
     }
     collideSegments(h) {
-      const segs = this.statics.concat(this.kinematics);
+      const segs = this.statics.concat(this.kinematics); const nS = this.statics.length;
       for (const s of segs) { s.minX = Math.min(s.ax, s.bx) - s.r - 12; s.maxX = Math.max(s.ax, s.bx) + s.r + 12; s.minY = Math.min(s.ay, s.by) - s.r - 12; s.maxY = Math.max(s.ay, s.by) + s.r + 12; }
       for (const p of this.particles) {
         if (p.dead) continue;
@@ -173,11 +173,11 @@
           if (p.held && s.holder) continue;   // 持っている食器自体は、持っている粒を押さない
           if (p.x < s.minX || p.x > s.maxX || p.y < s.minY || p.y > s.maxY) continue;
           if (s.filter && !s.filter(p)) continue;
-          this.collideSeg(p, s, h);
+          this.collideSeg(p, s, h, segs.indexOf(s) < nS);
         }
       }
     }
-    collideSeg(p, s, h) {
+    collideSeg(p, s, h, isStatic) {
       const c = closestOnSeg(p.x, p.y, s.ax, s.ay, s.bx, s.by, TMP); let dx = p.x - c.x, dy = p.y - c.y; const minD = p.r + s.r; const d2 = dx * dx + dy * dy;
       if (d2 >= minD * minD) return false;
       let d = Math.sqrt(d2); let nx, ny;
@@ -186,6 +186,10 @@
         nx = s.oneWay.x; ny = s.oneWay.y; const ds = dx * nx + dy * ny; if (ds >= minD) return false; d = ds;
         if (d < -minD * 2) return false;   // 大きく反対側にある粒は無関係
       } else if (d < 1e-4) { const sx = s.bx - s.ax, sy = s.by - s.ay; const L = Math.hypot(sx, sy) || 1; nx = -sy / L; ny = sx / L; const side = ((p.px - s.ax) * nx + (p.py - s.ay) * ny) < 0 ? -1 : 1; nx *= side; ny *= side; d = 0; } else { nx = dx / d; ny = dy / d; }
+      if (isStatic) {   // 止まっている壁（器・テーブル）: 前のステップと反対側へ抜けていたら元の側へ押し戻す（細い骨が皿をすり抜けていた。試作3.1）
+        const sx = s.bx - s.ax, sy = s.by - s.ay; const L2 = sx * sx + sy * sy;
+        if (L2 > 0) { const t = ((p.x - s.ax) * sx + (p.y - s.ay) * sy) / L2; if (t > 0 && t < 1) { const L = Math.sqrt(L2); const lnx = -sy / L, lny = sx / L; const ox = p.ox !== undefined ? p.ox : p.px, oy = p.oy !== undefined ? p.oy : p.py; const sPrev = (ox - s.ax) * lnx + (oy - s.ay) * lny, sNow = (p.x - s.ax) * lnx + (p.y - s.ay) * lny; if (sPrev * sNow < 0 && Math.abs(sPrev) < minD * 3) { const sg = sPrev < 0 ? -1 : 1; nx = lnx * sg; ny = lny * sg; d = sNow * sg; } } }
+      }
       const vx0 = p.x - p.px, vy0 = p.y - p.py;
       const push = minD - d; p.x += nx * push; p.y += ny * push;
       const svx = s.vx * h, svy = s.vy * h; const rvx = vx0 - svx, rvy = vy0 - svy; const vn = rvx * nx + rvy * ny;

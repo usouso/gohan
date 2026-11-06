@@ -1,0 +1,58 @@
+seed diner    dish       uten  end       time eaten spill swal chew chk bone slip clck grab sat cln man fail   ms labels
+1000 satoshi  sake       hashi timeout    240   44%    0%   32  231   0    0    3    0   37  43 100 100    2 5659 ゆっくり派
+1000 satoshi  sake       spoon timeout    240   24%   18%   18   98   0    0    0    0    0  19  43  65   55 8729 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  sake       fork  timeout    240   72%    8%   49  200   0    0  111    0  170  74  75 100   17 6147 ゆっくり派・骨とり名人・ぽろぽろ
+1000 satoshi  sake       hand  timeout    240   43%    1%   39  238   0    0    0    0   38  41  96 100    2 7387 小鳥食い・ゆっくり派
+1000 satoshi  miso       hashi quit       181   43%    6%   28  168   0    0    8    0   29  74  82 100    9 2059 小鳥食い・ゆっくり派・ぽろぽろ
+1000 satoshi  miso       spoon quit       136   49%   50%   12   98   0    0    0    0    0  58   0  65   12 1449 こぼし魔
+1000 satoshi  miso       fork  timeout    240   28%   13%   12   63   0    0  366    0  385  43  60 100  132 2455 小鳥食い・ゆっくり派・ぽろぽろ
+1000 satoshi  miso       hand  timeout    240   55%   34%   17  112   0    0    0    0   19  88   0   0   28 1937 ゆっくり派・こぼし魔
+1000 satoshi  ramen      hashi timeout    240   27%    1%   30  217   0    0    3    0   38  51  98 100   24 9465 小鳥食い・ゆっくり派
+1000 satoshi  ramen      spoon timeout    240   13%    5%   16  110   0    0    0    0    0  14  84  60   64 10584 小鳥食い・ゆっくり派
+1000 satoshi  ramen      fork  timeout    240   59%    6%   51  224   0    0   29    0  116  92  80 100    6 7217 ゆっくり派・ぽろぽろ
+1000 satoshi  ramen      hand  timeout    240   28%   18%   36  262   0    0    0    0   39  44  41 100    4 9442 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  curry      hashi quit       189   71%    5%   26  175   0    0    3    0   31  91  85 100    3 1517 ゆっくり派
+1000 satoshi  curry      spoon quit       178   42%   58%   18  126   0    0    0    0    0  47   0  55   19 1093 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  curry      fork  timeout    240   31%    7%   13   42   0    0  437    0  451  32  78 100  144 1802 小鳥食い・ゆっくり派・ぽろぽろ
+1000 satoshi  curry      hand  timeout    240   55%   20%   23  147   0    0    0    0   23  68  35   0   19 1676 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  gyoza      hashi timeout    240   71%    0%   42  238   0    0    2    0   45  93 100 100    2 2617 小鳥食い・ゆっくり派・きれい好き
+1000 satoshi  gyoza      spoon timeout    240   41%   59%   18  147   0    0    0    0    0  30   0  48   45 2320 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  gyoza      fork  finished   152   81%   15%   29  140   0    0   43    0   94 100  51 100    4 1300 こぼし魔・ぽろぽろ
+1000 satoshi  gyoza      hand  timeout    240   74%   25%   40  245   0    0    0    0   44  91  21 100    2 2511 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  onigiri    hashi timeout    240   57%    0%   36  231   0    0    0    0   37  73 100 100    3 3344 小鳥食い・ゆっくり派
+1000 satoshi  onigiri    spoon timeout    240    0%    0%    0    0   0    0    0    0    0   0 100 100  129 4680 
+1000 satoshi  onigiri    fork  finished   177   84%   12%   38  161   0    0   31    0   89 100  61 100    4 1629 ゆっくり派・ぽろぽろ
+1000 satoshi  onigiri    hand  timeout    240   54%    9%   48  252   0    0    0    0   37  62  72 100    0 3297 小鳥食い・ゆっくり派
+1000 satoshi  tonkatsu   hashi timeout    240   54%    1%   34  217   0    0    7    0   43  59  96 100    5 4869 ゆっくり派
+1000 satoshi  tonkatsu   spoon timeout    240   25%   19%   21  119   0    0    0    0    0  22  39  58   46 5738 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  tonkatsu   fork  timeout    240   70%    2%   44  147   0    0  135    0  191  70  93 100   53 3624 ゆっくり派・ぽろぽろ
+1000 satoshi  tonkatsu   hand  timeout    240   51%    0%   36  236   0    0    0    0   38  56 100 100    1 5014 小鳥食い・ゆっくり派
+1000 satoshi  udon       hashi timeout    240   36%    5%   33  259   0    0   28    0   62  57  85 100    6 5912 ゆっくり派・ぽろぽろ
+1000 satoshi  udon       spoon timeout    240   17%   11%   19  133   0    0    0    0    0  15  65  53   45 6169 小鳥食い・ゆっくり派
+1000 satoshi  udon       fork  timeout    240   18%   22%   12   84   0    0  345    0  360  29  31 100  116 6107 ゆっくり派・こぼし魔・ぽろぽろ
+1000 satoshi  udon       hand  timeout    240   40%   16%   34  245   0    0    3    0   37  58  48 100   14 5615 ゆっくり派・こぼし魔
+1000 satoshi  dragon_egg hashi quit       139  100%    1%   30  126   0    0   46    0   53 100  97 100    3  934 きれい好き・ぽろぽろ
+1000 satoshi  dragon_egg spoon timeout    240   38%   36%   11  140   0    0    0    0    0  45   0  50   52 2104 ゆっくり派・こぼし魔
+1000 satoshi  dragon_egg fork  timeout    240   52%    3%   16   77   0    0  393    0  411  77  90 100  122 1761 ゆっくり派・ぽろぽろ
+1000 satoshi  dragon_egg hand  timeout    240   95%   15%   30  210   0    0    1    0   32 100  52   7   11 1416 ゆっくり派・こぼし魔
+1000 satoshi  slime      hashi timeout    240    2%    0%    1   14   0    0  211    0  211   3 100 100   96 3345 ぽろぽろ
+1000 satoshi  slime      spoon timeout    240    0%    0%    0    0   0    0    0    0    0   0 100 100  127 3702 
+1000 satoshi  slime      fork  timeout    240    0%    0%    0    0   0    0 1256    0 1256   0 100 100  180 3464 ぽろぽろ
+1000 satoshi  slime      hand  timeout    240   46%    0%   23  161   0    0   78    0   99  69 100 100   74 2288 ゆっくり派・ぽろぽろ
+1000 satoshi  grapes     hashi quit        15   43%    0%    2   14   0    0    7    0    8  33 100 100    0   63 大口
+1000 satoshi  grapes     spoon quit        78    0%   71%    0    0   0    0    0    0    0   0   0 100   38  215 こぼし魔
+1000 satoshi  grapes     fork  quit        10   29%    0%    1    7   0    0    5    0    7  14 100 100    1   30 
+1000 satoshi  grapes     hand  quit        15   29%    0%    2   14   0    0    1    0    2  38 100 100    0   44 
+1000 satoshi  bonefish   hashi finished   172   85%    2%   30  182   0    0    3    0   37 100  93 100    0 4644 小鳥食い・ゆっくり派・骨とり名人
+1000 satoshi  bonefish   spoon quit       227   34%   59%   10   91   0    0    0    0    0  29   0  68   68 6645 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  bonefish   fork  gone       205   71%   21%   17  126   0    0  205    0  229  88  32 100   64 5247 ゆっくり派・こぼし魔・骨とり名人
+1000 satoshi  bonefish   hand  finished   176   78%   31%   28  189   0    0    0    0   29  86   0 100    0 4544 小鳥食い・ゆっくり派・こぼし魔
+1000 satoshi  bread      hashi timeout    240   65%    1%   44  245   0    0   30    0   63  85  96 100    0 3009 ゆっくり派・きれい好き・ぽろぽろ
+1000 satoshi  bread      spoon timeout    240    0%    0%    0    0   0    0    0    0    0   0 100 100  129 4599 
+1000 satoshi  bread      fork  finished   201   83%   18%   44  175   1    0   47    0  104  93  36  93    5 1674 ゆっくり派・こぼし魔・ぽろぽろ
+1000 satoshi  bread      hand  timeout    240   58%    1%   38  252   0    0    0    0   37  76  96 100    2 3050 ゆっくり派
+1000 satoshi  stew       hashi timeout    240   14%    4%    9   84   0    1    5    0   15  14  86   0   39 5092 小鳥食い・ゆっくり派・骨ごと
+1000 satoshi  stew       spoon timeout    240   35%   25%   19  161   0    2    0    0    0  33  19  43   34 4426 ゆっくり派・こぼし魔・骨ごと
+1000 satoshi  stew       fork  quit        73   17%    0%    9   56   0    4   36    0   50  20 100  86   11 1571 骨ごと・ぽろぽろ
+1000 satoshi  stew       hand  quit        76   20%    6%   13   70   0    0    0    0   10  37  82 100    4 1625 
+--- 平均: 食べた 44%  こぼし 13%  時間 206s  満足 52  きれい 66  マナー 85  完食率 9%

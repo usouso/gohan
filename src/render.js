@@ -93,7 +93,8 @@
     }
     // ---- 背景（1回だけ描いて使いまわす） ----
     background(game) {
-      const key = game.tableRight + '|' + game.diner.id + '|' + (this.assets.pending === 0);
+      const vl = game.vesselList; const matL = Math.min(...vl.map(v => v.left)) - 70, matR = Math.max(...vl.map(v => v.right)) + 70;   // ランチョンマットは器の端から
+      const key = game.tableRight + '|' + game.diner.id + '|' + matL + '|' + matR + '|' + (this.assets.pending === 0);
       if (this.bg && this.bgKey === key) return this.bg;
       const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); const A = this.assets;
       const ty = game.tableY, tr = game.tableRight + 40;
@@ -118,7 +119,6 @@
       x.fillStyle = wp || '#b8834c'; x.fillRect(0, ty - 14, tr, 16);
       x.fillStyle = 'rgba(255,240,210,.22)'; x.fillRect(0, ty - 14, tr, 16);
       // ランチョンマット（麻布）
-      const matL = game.mainX - 300, matR = game.vessels.side ? game.sideX + 240 : game.wideX + 260;
       const cp = A.pat(x, 'cloth', .9); x.fillStyle = cp || '#cdbb9a'; x.fillRect(matL, ty - 12, matR - matL, 14); x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(matL, ty - 12, matR - matL, 2); x.fillStyle = 'rgba(255,255,255,.15)'; x.fillRect(matL, ty - 10, matR - matL, 2);
       // テーブル：手前の面（厚み）
       const th = 44; const wp2 = A.pat(x, 'wood', .75, 0, 0, ty + 2); x.fillStyle = wp2 || '#9a6433'; x.fillRect(0, ty + 2, tr, th);
