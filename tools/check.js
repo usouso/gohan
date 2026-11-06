@@ -47,7 +47,7 @@ const TEXT_CHECK = `(() => {
     await new Promise(r => setTimeout(r, 150));
     textAgg(await page.evaluate(TEXT_CHECK)); const shot = async name => { const f = path.join(outDir, `${name}-${tag}.png`); await page.screenshot({ path: f }); res.shots.push(path.relative(path.join(__dirname, '..'), f)); };
     await shot('01-title');
-    await page.waitForFunction(() => window.__gohan && window.__gohan.screen === 'reveal', { timeout: 5000 }).catch(() => { });
+    await page.waitForFunction(() => window.__gohan && window.__gohan.screen === 'reveal', { timeout: 8000 }).catch(() => { });
     textAgg(await page.evaluate(TEXT_CHECK)); await shot('02-reveal');
     await page.waitForFunction(() => window.__gohan && window.__gohan.screen === 'play', { timeout: 5000 }).catch(() => { });
     // 食べている間：100ms ごとに文字検査、途中で写真2枚

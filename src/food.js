@@ -146,7 +146,7 @@
       }
     }
     const bones = spine.concat(ribs);
-    const nearBone = (x, y) => { for (const b of bones) if (Math.hypot(b.x - x, b.y - y) < (r + b.r) * .8) return true; return false; };
+    const nearBone = (x, y) => { for (const b of bones) if (Math.hypot(b.x - x, b.y - y) < (r + b.r) * .55) return true; return false; };   // .8 だと骨の密な魚に身が1つも入らなかった（試作3で修正）
     const body = addParticles(world, flesh, ellipseHex(cx, cy, rx - 2, ry - 2, r * 2 * .95, nearBone), r, cl);
     linkNeighbors(world, body, r * 2 * 1.25, flesh.stiff, flesh.breakAt);
     for (const b of bones) for (const q of nearest(body, b.x, b.y, 2)) if (Math.hypot(q.x - b.x, q.y - b.y) < r * 2.6) world.link(b, q, .35, 1.3);
@@ -268,7 +268,7 @@
     const solids = all.filter(p => !p.mat.liquid);
     for (const p of all) {
       if (!p.mat.liquid) continue;
-      for (const q of solids) { const dx = q.x - p.x, dy = q.y - p.y; const rr = (p.r + q.r) * .92; if (dx * dx + dy * dy < rr * rr) { world.kill(p, 'overlap'); break; } }
+      for (const q of solids) { const dx = q.x - p.x, dy = q.y - p.y; const rr = (p.r + q.r) * .62; if (dx * dx + dy * dy < rr * rr) { world.kill(p, 'overlap'); break; } }   // .92 だと麺の入った汁がほとんど消えた（試作3で修正。少しの重なりは settle がほどく）
     }
     world.cleanup(); world.events.length = 0;
     const alive = all.filter(p => !p.dead);

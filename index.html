@@ -9,9 +9,9 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #1a140f; color: var(--ink); font-family: "Noto Sans JP", "Yu Gothic UI", "Meiryo", "Hiragino Sans", sans-serif; font-size: 20px; }
   #app { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
-  #topbar, #bottombar { flex: 0 0 auto; min-height: 60px; background: var(--bar); color: #f3eadb; display: flex; align-items: center; gap: 14px; padding: 6px 16px; font-size: 20px; }
-  #topbar { border-bottom: 2px solid #4a3b2e; }
-  #bottombar { border-top: 2px solid #4a3b2e; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  #topbar, #bottombar { flex: 0 0 auto; min-height: 60px; background: linear-gradient(180deg, #332821, #241c16 60%, #1f1813); color: #f3eadb; display: flex; align-items: center; gap: 14px; padding: 6px 16px; font-size: 20px; }
+  #topbar { border-bottom: 2px solid #5a4636; box-shadow: 0 2px 10px rgba(0,0,0,.4); }
+  #bottombar { border-top: 2px solid #5a4636; justify-content: center; gap: 8px; flex-wrap: wrap; }
   #padbar { flex: 0 0 auto; background: #231c17; color: #f3eadb; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 4px 16px; font-size: 18px; border-top: 1px solid #4a3b2e; }
   #menuText { font-weight: 700; white-space: nowrap; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   #status { flex: 1 1 120px; min-width: 0; text-align: center; font-size: 22px; color: #ffe2a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -20,15 +20,18 @@
   #fullBar { width: 120px; height: 18px; background: #4a3b2e; border-radius: 9px; overflow: hidden; }
   #fullFill { height: 100%; width: 0%; background: linear-gradient(90deg, #e9b44c, #c8542a); transition: width .2s; }
   #volWrap input { width: 90px; vertical-align: middle; }
-  button { font: inherit; font-size: 22px; padding: 10px 26px; border-radius: 12px; border: 0; cursor: pointer; background: var(--accent); color: #fff; font-weight: 700; box-shadow: 0 3px 0 #8a3418; }
-  button:active { transform: translateY(2px); box-shadow: none; }
-  button.quiet { background: #5a4a3c; box-shadow: 0 3px 0 #332a21; }
+  button { font: inherit; font-size: 22px; padding: 10px 26px; border-radius: 12px; border: 0; cursor: pointer; background: linear-gradient(180deg, #e0673a, #c24d22); color: #fff; font-weight: 700; box-shadow: 0 3px 0 #8a3418, inset 0 1px 0 rgba(255,255,255,.35); text-shadow: 0 1px 1px rgba(0,0,0,.25); }
+  button:hover { filter: brightness(1.06); }
+  button:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+  button.quiet { background: linear-gradient(180deg, #6a5848, #4e3f33); box-shadow: 0 3px 0 #332a21, inset 0 1px 0 rgba(255,255,255,.2); }
   #btnFinish { font-size: 18px; padding: 8px 16px; }
   #stage { flex: 1 1 auto; position: relative; display: flex; align-items: center; justify-content: center; background: #1a140f; min-height: 0; }
   #cv { display: block; cursor: crosshair; }
-  .screen { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(20, 14, 10, .55); }
-  .card { background: var(--paper); border-radius: 18px; padding: 20px 36px; box-shadow: 0 12px 40px rgba(0,0,0,.45); max-width: 1180px; width: min(94%, 1180px); max-height: 96%; overflow: auto; }
-  h1 { margin: 0 0 6px; font-size: 54px; letter-spacing: .04em; }
+  .screen { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: radial-gradient(ellipse at 50% 45%, rgba(20,14,10,.45), rgba(15,10,6,.7)); }
+  .card { background: var(--paper) url(assets/tex/paper.png); background-size: 512px; border-radius: 18px; padding: 20px 36px; box-shadow: 0 12px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(120,90,60,.25), inset 0 0 60px rgba(120,90,60,.12); max-width: 1180px; width: min(94%, 1180px); max-height: 96%; overflow: auto; }
+  h1 { margin: 0 0 6px; font-size: 54px; letter-spacing: .04em; display: flex; align-items: center; gap: 18px; }
+  h1 svg { width: 76px; height: 76px; flex: 0 0 auto; filter: drop-shadow(0 2px 2px rgba(0,0,0,.2)); }
+  .goal, .rv, .score { box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0,0,0,.08); }
   h2 { margin: 0 0 14px; font-size: 32px; }
   .sub { font-size: 22px; color: #5a4a3c; margin-bottom: 18px; }
   .goals { display: flex; gap: 18px; margin: 14px 0 22px; }
@@ -53,7 +56,9 @@
   .chip { display: inline-flex; align-items: center; gap: 8px; background: #3b3028; border-radius: 10px; padding: 6px 12px; font-size: 19px; white-space: nowrap; }
   .chip kbd { background: #f3eadb; color: #2a221c; border-radius: 6px; padding: 2px 8px; font-size: 18px; font-weight: 700; font-family: inherit; }
   .note { font-size: 19px; color: #6a5a4a; }
-  @media (max-width: 1400px) { .chip { font-size: 17px; padding: 4px 9px; } .chip kbd { font-size: 16px; } #topbar { font-size: 18px; gap: 10px; } #status { font-size: 19px; } #btnFinish { font-size: 16px; padding: 6px 12px; } }
+  @media (max-width: 1400px) { .chip { font-size: 16px; padding: 4px 7px; gap: 6px; } .chip kbd { font-size: 15px; padding: 2px 6px; } #bottombar { gap: 5px; padding: 6px 8px; } #topbar { font-size: 18px; gap: 10px; } #status { font-size: 19px; } #btnFinish { font-size: 16px; padding: 6px 12px; } }
+  /* 低い画面（1366×650 など）では結果の画面を詰めて、中のスクロールなしで収める */
+  @media (max-height: 720px) { .card { padding: 10px 28px; } h2 { font-size: 24px; margin-bottom: 4px; } #rsLine { font-size: 21px; margin: 2px 0 4px; } .scores { margin: 4px 0 4px; gap: 12px; } .score { padding: 0 12px; } .score .k { font-size: 17px; } .score .v { font-size: 30px; line-height: 1.2; } #rsLabels { margin: 2px 0 4px; } .label { font-size: 18px; padding: 2px 14px; } #rsTable { font-size: 16px; } #rsTable .r { padding: 1px 4px; } #result .row { margin-top: 6px !important; } #result button { font-size: 18px; padding: 6px 18px; } .rv { min-height: 120px; padding: 12px 16px; } .goals { margin: 10px 0 14px; } .goal { padding: 10px 14px; } h1 { font-size: 44px; } }
 </style>
 </head>
 <body>
@@ -71,7 +76,7 @@
     <canvas id="cv" width="1600" height="760"></canvas>
     <div id="title" class="screen">
       <div class="card">
-        <h1>きょうのごはん</h1>
+        <h1><svg viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="lgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b4b73"/><stop offset="1" stop-color="#1f2a45"/></linearGradient><radialGradient id="rgR" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9d0bf"/></radialGradient></defs><path d="M22 44 Q50 20 78 44 L74 44 Q50 30 26 44Z" fill="url(#rgR)"/><ellipse cx="50" cy="44" rx="30" ry="9" fill="#f4efe4"/><path d="M18 46 H82 Q80 72 60 80 H40 Q20 72 18 46Z" fill="url(#lgB)"/><path d="M38 80 H62 L60 88 H40Z" fill="#17203a"/><path d="M22 52 H78" stroke="#dfe6f5" stroke-width="2.5" stroke-linecap="round" opacity=".8"/><path d="M30 60 Q50 55 70 60" stroke="#c8402a" stroke-width="3" stroke-linecap="round" fill="none" opacity=".9"/><path d="M62 10 L88 46" stroke="#a66b34" stroke-width="3.6" stroke-linecap="round"/><path d="M70 8 L92 42" stroke="#8a5424" stroke-width="3.6" stroke-linecap="round"/><path d="M40 10 q-6 6 0 12 q6 6 0 12" stroke="#b9a99a" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".7"/><path d="M52 6 q-6 6 0 12 q6 6 0 12" stroke="#b9a99a" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".55"/></svg>きょうのごはん</h1>
         <div class="sub">人や、ふしぎな生きものが、その日のごはんを食べる。手・箸・口・あご・のど、ぜんぶ自分で動かす。</div>
         <div class="goals">
           <div class="goal"><span class="ic">🍚</span>料理を食べきる</div>
@@ -140,6 +145,7 @@
 <script src="src/game.js"></script>
 <script src="src/bot.js"></script>
 <script src="src/audio.js"></script>
+<script src="src/textures.js"></script>
 <script src="src/render.js"></script>
 <script src="src/main.js"></script>
 </body>

@@ -20,6 +20,11 @@
   window.addEventListener('resize', resize); resize();
 
   function show(id) { for (const s of ['title', 'reveal', 'result']) $(s).style.display = s === id ? 'flex' : 'none'; screen = id || 'play'; $('btnFinish').style.display = screen === 'play' ? '' : 'none'; }
+  // 題字の後ろに食卓を1つ描いておく（遊び始める前の黒い画面をなくす）
+  let preview = null;
+  function drawPreview() { if (game) return; if (!preview) preview = new GohanGame.Game({}); renderer.draw(preview); }
+  { const prevReady = renderer.assets.onReady; renderer.assets.onReady = () => { if (prevReady) prevReady(); if (!game) drawPreview(); }; }
+  window.addEventListener('resize', () => { if (!game) drawPreview(); });
   function newGame(seed) {
     const g = new GohanGame.Game({ seed: seed === null ? undefined : seed, diner: forced.diner, dish: forced.dish, utensil: forced.utensil });
     game = g; lastSeed = g.seed; bot = AUTO ? GohanBot.makeBot(g) : null;
@@ -145,16 +150,16 @@
 
   // ---- 自動確認（?auto=1）：タイトル → 食卓 → 食べる → 結果 まで自分で進む ----
   if (AUTO) {
-    setTimeout(() => $('btnStart').click(), 300);
-    setTimeout(() => { if (screen === 'reveal') $('btnGo').click(); }, 1200);
+    setTimeout(() => $('btnStart').click(), 700);   // 題字の画面を写真に撮る時間を残す
+    setTimeout(() => { if (screen === 'reveal') $('btnGo').click(); }, 1500);
   }
   window.__gohan = {
     get game() { return game; }, get screen() { return screen; }, get rounds() { return rounds; },
-    state() { return game ? { screen, state: game.state, time: game.time, eaten: game.stats.eaten / game.edibleTotal, seed: game.seed, diner: game.diner.id, dish: game.dish.id, utensil: game.utensilKey, particles: game.world.particles.length, result: game.result || null } : { screen }; },
+    state() { return game ? { screen, state: game.state, time: game.time, eaten: game.stats.eaten / game.edibleTotal, seed: game.seed, diner: game.diner.id, dish: game.dish.id, utensil: game.utensilKey, particles: game.world.particles.length, drawMs: Math.round(renderer.lastMs * 100) / 100, result: game.result || null } : { screen }; },
     start() { $('btnStart').click(); }, go() { $('btnGo').click(); }, again() { $('btnAgain').click(); },
     step(dt) { if (game && screen === 'play') { stepGame(dt || 1 / 60); renderer.draw(game); updateHud(); } },
     // コマ送り画像：n コマを dtMs ごとに進めて横に並べる
     capture(n, dtMs) { if (!game) return null; const c = document.createElement('canvas'); const w = 320, h = Math.round(320 * H / W); c.width = w * n; c.height = h; const x = c.getContext('2d'); for (let i = 0; i < n; i++) { for (let k = 0; k < Math.round(dtMs / 1000 * 60); k++) stepGame(1 / 60); renderer.draw(game); x.drawImage(cv, i * w, 0, w, h); } return c.toDataURL('image/png'); },
   };
-  show('title');
+  show('title'); drawPreview();
 })();

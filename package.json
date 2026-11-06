@@ -7,6 +7,8 @@
     "bot": "node bot/run.js",
     "bot:all": "node bot/run.js --all --seeds 1",
     "check": "node tools/check.js",
+    "assets": "node tools/make-assets.js",
+    "gallery": "node tools/gallery.js --zoom",
     "serve": "node serve.js 8765"
   },
   "keywords": [],
